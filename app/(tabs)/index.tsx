@@ -1,70 +1,167 @@
-import { Image, StyleSheet, Platform } from 'react-native';
-
-import { HelloWave } from '@/components/HelloWave';
-import ParallaxScrollView from '@/components/ParallaxScrollView';
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
+import Button from "@/components/Button";
+import { View, StyleSheet, Text, FlatList } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { Entypo } from "@expo/vector-icons";
+import Searchbar from "@/components/Searchbar";
+import SegmentedButtons from "@/components/SegmentedButton";
+import { FontAwesome } from "@expo/vector-icons";
+import { Feather } from "@expo/vector-icons";
 
 export default function HomeScreen() {
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
+    <SafeAreaView
+      style={{
+        flex: 1,
+      }}
+    >
+      <View style={styles.container}>
+        <View
+          style={{
+            display: "flex",
+            flexDirection: "row",
+            justifyContent: "space-between",
+            alignItems: "center",
+          }}
+        >
+          <Text
+            style={{
+              fontSize: 30,
+              fontWeight: "bold",
+            }}
+          >
+            Vault
+          </Text>
+          <View>
+            <Button
+              buttonColor="red"
+              textColor="white"
+              mode="contained"
+              cb={() => {}}
+              style={{
+                borderRadius: 10,
+              }}
+            >
+              <View
+                style={{
+                  display: "flex",
+                  flexDirection: "row",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: 6,
+                }}
+              >
+                <Entypo name="plus" size={24} color="white" />
+                <Text
+                  style={{
+                    color: "white",
+                  }}
+                >
+                  New
+                </Text>
+              </View>
+            </Button>
+          </View>
+        </View>
+        <View
+          style={{
+            width: "100%",
+          }}
+        >
+          <Searchbar></Searchbar>
+        </View>
+        <View>
+          <SegmentedButtons />
+        </View>
+      </View>
+      <View
+        style={{
+          flex: 1,
+          width: "100%",
+          paddingHorizontal: 20,
+        }}
+      >
+        <FlatList
+          data={[
+            {
+              id: 1,
+              icon: (
+                <FontAwesome name="facebook-square" size={35} color="blue" />
+              ),
+              section: "Facebook",
+              account: "0342566774",
+            },
+            {
+              id: 2,
+              icon: <Feather name="instagram" size={35} color="black" />,
+              section: "Instagram",
+              account: "0342566774",
+            },
+            {
+              id: 3,
+              icon: <FontAwesome name="telegram" size={35} color="black" />,
+              section: "Telegram",
+              account: "0342566774",
+            },
+            {
+              id: 4,
+              icon: <Entypo name="mail" size={35} color="black" />,
+              section: "gmail.com",
+              account: "0342566774",
+            },
+          ]}
+          renderItem={({ item }) => (
+            <View
+              style={{
+                width: "100%",
+                display: "flex",
+                flexDirection: "row",
+                justifyContent: "space-between",
+                alignItems: "center",
+                borderBottomWidth: 1,
+                borderStyle: "solid",
+                borderColor: "gray",
+                paddingVertical: 10,
+              }}
+            >
+              <View
+                style={{
+                  display: "flex",
+                  flexDirection: "row",
+                  alignItems: "center",
+                  gap: 20,
+                  paddingVertical: 10,
+                }}
+              >
+                {item.icon}
+                <View>
+                  <Text
+                    style={{
+                      fontSize: 16,
+                      fontWeight: "bold",
+                    }}
+                  >
+                    {item.section}
+                  </Text>
+                  <Text>{item.account}</Text>
+                </View>
+              </View>
+              <View>
+                <Feather name="copy" size={24} color="black" />
+              </View>
+            </View>
+          )}
         />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({ ios: 'cmd + d', android: 'cmd + m' })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-        <ThemedText>
-          Tap the Explore tab to learn more about what's included in this starter app.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          When you're ready, run{' '}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+      </View>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
-  },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
+  container: {
+    // flex: 1,
+    paddingHorizontal: 20,
+    paddingVertical: 20,
+    display: "flex",
+    gap: 20,
   },
 });
