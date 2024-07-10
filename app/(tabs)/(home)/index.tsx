@@ -6,8 +6,46 @@ import Searchbar from "@/components/Searchbar";
 import SegmentedButtons from "@/components/SegmentedButton";
 import { FontAwesome } from "@expo/vector-icons";
 import { Feather } from "@expo/vector-icons";
+import { router } from "expo-router";
+import {
+  collection,
+  query,
+  where,
+  getDocs,
+  getFirestore,
+  DocumentData,
+} from "firebase/firestore";
+import { useEffect, useState } from "react";
+import { FIREBASE_APP } from "@/config/firebase.config";
+import { getAuth } from "firebase/auth";
+import { SvgXml } from "react-native-svg";
 
 export default function HomeScreen() {
+  const [vaults, setVaults] = useState<
+    | {
+        id: string;
+        data: DocumentData;
+      }[]
+    | []
+  >([]);
+
+  useEffect(() => {
+    (async () => {
+      const q = query(
+        collection(getFirestore(FIREBASE_APP), "vaults"),
+        where("userId", "==", getAuth(FIREBASE_APP).currentUser?.uid)
+      );
+
+      const querySnapshot = await getDocs(q);
+      setVaults(
+        querySnapshot.docs.map((doc) => ({
+          id: doc.id,
+          data: doc.data(),
+        }))
+      );
+    })();
+  }, []);
+
   return (
     <SafeAreaView
       style={{
@@ -34,9 +72,8 @@ export default function HomeScreen() {
           <View>
             <Button
               buttonColor="red"
-              textColor="white"
               mode="contained"
-              cb={() => {}}
+              cb={() => router.push("/add-new")}
               style={{
                 borderRadius: 10,
               }}
@@ -69,9 +106,9 @@ export default function HomeScreen() {
         >
           <Searchbar></Searchbar>
         </View>
-        <View>
+        {/* <View>
           <SegmentedButtons />
-        </View>
+        </View> */}
       </View>
       <View
         style={{
@@ -80,77 +117,55 @@ export default function HomeScreen() {
           paddingHorizontal: 20,
         }}
       >
-        <FlatList
-          data={[
-            {
-              id: 1,
-              icon: (
-                <FontAwesome name="facebook-square" size={35} color="blue" />
-              ),
-              section: "Facebook",
-              account: "0342566774",
-            },
-            {
-              id: 2,
-              icon: <Feather name="instagram" size={35} color="black" />,
-              section: "Instagram",
-              account: "0342566774",
-            },
-            {
-              id: 3,
-              icon: <FontAwesome name="telegram" size={35} color="black" />,
-              section: "Telegram",
-              account: "0342566774",
-            },
-            {
-              id: 4,
-              icon: <Entypo name="mail" size={35} color="black" />,
-              section: "gmail.com",
-              account: "0342566774",
-            },
-          ]}
-          renderItem={({ item }) => (
-            <View
-              style={{
-                width: "100%",
-                display: "flex",
-                flexDirection: "row",
-                justifyContent: "space-between",
-                alignItems: "center",
-                borderBottomWidth: 1,
-                borderStyle: "solid",
-                borderColor: "gray",
-                paddingVertical: 10,
-              }}
-            >
+        {vaults && vaults?.length > 0 ? (
+          <FlatList
+            data={vaults}
+            renderItem={({ item }) => (
               <View
                 style={{
+                  width: "100%",
                   display: "flex",
                   flexDirection: "row",
+                  justifyContent: "space-between",
                   alignItems: "center",
-                  gap: 20,
+                  borderBottomWidth: 1,
+                  borderStyle: "solid",
+                  borderColor: "gray",
                   paddingVertical: 10,
                 }}
               >
-                {item.icon}
+                <View
+                  style={{
+                    display: "flex",
+                    flexDirection: "row",
+                    alignItems: "center",
+
+                    gap: 20,
+                    paddingVertical: 10,
+                  }}
+                >
+                  <SvgXml xml={item.data.icon} width={30} height={30} />
+                  <View>
+                    <Text
+                      style={{
+                        fontSize: 16,
+                        fontWeight: "bold",
+                      }}
+                    >
+                      {item.data.title}
+                    </Text>
+                    <Text>{item.data.account}</Text>
+                  </View>
+                </View>
                 <View>
-                  <Text
-                    style={{
-                      fontSize: 16,
-                      fontWeight: "bold",
-                    }}
-                  >
-                    {item.section}
-                  </Text>
-                  <Text>{item.account}</Text>
+                  <Feather name="copy" size={24} color="black" />
                 </View>
               </View>
-              <View>
-                <Feather name="copy" size={24} color="black" />
-              </View>
-            </View>
-          )}
-        />
+            )}
+          />
+        ) : (
+          <Text>Chưa có vault nào.</Text>
+        )}
       </View>
     </SafeAreaView>
   );

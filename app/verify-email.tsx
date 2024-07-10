@@ -5,13 +5,13 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import React from "react";
 import { useEffect, useState } from "react";
 import { router, useGlobalSearchParams } from "expo-router";
-import Button from "@/components/Button";
+import { Button } from "@/components";
 import { FIREBASE_APP } from "@/config/firebase.config";
 import { getAuth } from "firebase/auth";
 import { MaterialIcons } from "@expo/vector-icons";
+import { Entypo } from "@expo/vector-icons";
 
 const VerifyEmail = () => {
   const [count, setCount] = useState<number>(60);
@@ -68,7 +68,6 @@ const VerifyEmail = () => {
           <View
             style={{
               display: "flex",
-
               alignItems: "center",
               gap: 10,
             }}
@@ -127,17 +126,26 @@ const VerifyEmail = () => {
               gap: 30,
             }}
           >
-            <Text
+            <View
               style={{
-                fontSize: 16,
-                lineHeight: 24,
-                textAlign: "center",
-                fontWeight: 500,
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                gap: 10,
               }}
             >
-              Verification link đã được gửi.Hãy kiểm tra email của bạn.Nếu bạn
-              không nhận được, hãy kiểm tra hộp thư spam.
-            </Text>
+              <Entypo name="mail" size={30} color="black" />
+              <Text
+                style={{
+                  fontSize: 16,
+                  lineHeight: 24,
+                  textAlign: "center",
+                }}
+              >
+                Verification link đã được gửi.Hãy kiểm tra email của bạn. Nếu
+                chưa nhận được, hãy kiểm tra hộp thư spam
+              </Text>
+            </View>
             <Text
               style={{
                 color: "black",
@@ -164,7 +172,7 @@ const VerifyEmail = () => {
                 }}
               >
                 <Text>Bạn chưa nhận được email?</Text>
-                <TouchableOpacity>
+                <TouchableOpacity onPress={() => {}}>
                   <Text
                     style={{
                       color: "blue",
@@ -189,7 +197,6 @@ const VerifyEmail = () => {
                 }}
                 mode="contained"
                 buttonColor="red"
-                textColor="white"
                 cb={() => router.push("/")}
               >
                 <Text

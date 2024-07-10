@@ -1,11 +1,9 @@
 import { StyleSheet, Text, View } from "react-native";
-import React, { useState } from "react";
+import { useState } from "react";
 import { router } from "expo-router";
 
 import { SafeAreaView } from "react-native-safe-area-context";
-import TextInput from "@/components/TextInput";
-import Button from "@/components/Button";
-import { TextInput as PaperTextInput } from "react-native-paper";
+import { TextInput, Button } from "@/components";
 import generateSalt from "@/utils/generateSalt";
 import generateSek from "@/utils/generateSek";
 import { encodeSek } from "@/utils/encryption";
@@ -16,7 +14,6 @@ import { doc, getFirestore, setDoc } from "firebase/firestore";
 
 const Passphrase = () => {
   const [passPhrase, setPassPhrase] = useState("");
-  const [hide, setHide] = useState(true);
 
   const handleOk = async () => {
     const salt = generateSalt(10);
@@ -73,19 +70,14 @@ const Passphrase = () => {
           }}
         >
           <TextInput
-            secureTextEntry={hide ? true : false}
-            right={
-              <PaperTextInput.Icon
-                onPress={() => setHide((prev) => !prev)}
-                icon={hide ? "eye-off" : "eye"}
-              />
-            }
+            isPassword
             label="PassPhrase"
             value={passPhrase}
             cb={setPassPhrase}
             placeholder="PassPhrase"
           ></TextInput>
         </View>
+        <View></View>
         <View
           style={{
             width: "100%",
@@ -101,7 +93,6 @@ const Passphrase = () => {
               alignContent: "center",
             }}
             buttonColor="red"
-            textColor="white"
             mode="contained"
             cb={handleOk}
           >

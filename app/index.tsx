@@ -1,13 +1,8 @@
 import { StyleSheet, Text, View } from "react-native";
-import React from "react";
 import { useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { TouchableOpacity } from "react-native";
 import { router } from "expo-router";
-import Switch from "@/components/Switch";
-import TextInput from "@/components/TextInput";
-import Button from "@/components/Button";
-import { TextInput as PaperTextInput } from "react-native-paper";
+import { TextInput, Button, Switch, TextLink } from "@/components/";
 import { FIREBASE_APP } from "@/config/firebase.config";
 import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
 import { doc, getDoc, getFirestore } from "firebase/firestore";
@@ -16,7 +11,8 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 const Index = () => {
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
-  const [hide, setHide] = useState<boolean>(true);
+  const [error, setError] = useState<any>(null);
+  const [theme, setTheme] = useState<boolean>(false);
 
   const handleSignIn = async () => {
     try {
@@ -44,7 +40,7 @@ const Index = () => {
         console.log("No such document!");
       }
     } catch (e: any) {
-      alert(e.message);
+      setError(e.message);
     }
   };
 
@@ -53,7 +49,7 @@ const Index = () => {
       <View style={styles.container}>
         <View style={styles.switch}>
           <Text>Chế độ Sáng / Tối</Text>
-          <Switch></Switch>
+          <Switch status={theme} onChange={() => setTheme((prev) => !prev)} />
         </View>
         <View
           style={{
@@ -73,30 +69,30 @@ const Index = () => {
               placeholder="Nhập email"
               value={email}
               cb={setEmail}
-              secureTextEntry={false}
             ></TextInput>
             <TextInput
               label="Mật khẩu"
               placeholder="Nhập mật khẩu"
               value={password}
               cb={setPassword}
-              secureTextEntry={hide ? true : false}
-              right={
-                <PaperTextInput.Icon
-                  onPress={() => setHide((prev) => !prev)}
-                  icon={hide ? "eye-off" : "eye"}
-                />
-              }
+              isPassword={true}
             />
           </View>
-          <View style={{ width: "100%", alignItems: "flex-end" }}>
+          {error && (
             <Text
               style={{
-                color: "blue",
+                color: "red",
               }}
             >
-              Quên mật khẩu?
+              Email hoặc mật khẩu không đúng!
             </Text>
+          )}
+          <View style={{ width: "100%", alignItems: "flex-end" }}>
+            <TextLink
+              title="Quên mật khẩu?"
+              style={{ color: "blue" }}
+              navigate={() => router.push("/forgot-password")}
+            />
           </View>
         </View>
         <View
@@ -110,12 +106,15 @@ const Index = () => {
           }}
         >
           <Button
+            disabled={!email || !password ? true : false}
             style={{
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
               borderRadius: 10,
-              height: 40,
+              height: 50,
             }}
             buttonColor="red"
-            textColor="white"
             mode="text"
             cb={handleSignIn}
           >
@@ -131,9 +130,13 @@ const Index = () => {
             }}
           >
             <Text>Bạn chưa có tài khoản?</Text>
-            <TouchableOpacity onPress={() => router.push("/register")}>
-              <Text style={{ color: "blue" }}>Tạo tài khoản</Text>
-            </TouchableOpacity>
+            <TextLink
+              title="Tạo tài khoản"
+              style={{
+                color: "blue",
+              }}
+              navigate={() => router.push("/register")}
+            />
           </View>
         </View>
       </View>

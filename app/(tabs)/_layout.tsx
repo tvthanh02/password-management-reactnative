@@ -10,16 +10,16 @@ export default function TabLayout() {
       }}
     >
       <Tabs.Screen
-        name="index"
+        name="(home)"
         options={{
-          title: "Home",
+          tabBarShowLabel: false,
           tabBarIcon: () => <AntDesign name="home" size={24} color="black" />,
         }}
       />
       <Tabs.Screen
         name="(settings)"
         options={{
-          title: "Setting",
+          tabBarShowLabel: false,
           tabBarIcon: () => (
             <AntDesign name="setting" size={24} color="black" />
           ),
