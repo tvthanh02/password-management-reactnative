@@ -4,10 +4,10 @@ import {
   RecursiveArray,
   RegisteredStyle,
   ViewStyle,
+  StyleSheet,
 } from "react-native";
 import { Button as PaperButton } from "react-native-paper";
 import { IconSource } from "react-native-paper/lib/typescript/components/Icon";
-import { View } from "react-native";
 
 type props = {
   style?:
@@ -18,7 +18,6 @@ type props = {
     | Falsy
     | RegisteredStyle<ViewStyle>;
   buttonColor: string;
-  textColor: string;
   icon?: IconSource | undefined;
   mode:
     | "text"
@@ -34,9 +33,9 @@ type props = {
 
 const Button = (props: props) => (
   <PaperButton
-    disabled={props.disabled || false}
+    disabled={props.disabled ?? false}
     icon={props.icon}
-    style={props.style}
+    style={[props.style, props.disabled ? styles.disabledButton : null]}
     buttonColor={props.buttonColor}
     mode={props.mode}
     onPress={props.cb}
@@ -44,5 +43,12 @@ const Button = (props: props) => (
     {props.children}
   </PaperButton>
 );
+
+const styles = StyleSheet.create({
+  disabledButton: {
+    backgroundColor: "red",
+    opacity: 0.4,
+  },
+});
 
 export default Button;

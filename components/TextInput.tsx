@@ -1,27 +1,45 @@
 import * as React from "react";
+import { useState } from "react";
 
 import { TextInput as PaperTextInput } from "react-native-paper";
 
-type props = {
+type propsTextInput = {
   mode?: "outlined" | "flat";
-  label: string;
-  placeholder: string;
+  label?: string;
+  placeholder?: string;
   right?: React.ReactNode | undefined;
-  secureTextEntry: boolean;
   value: string;
+  isPassword?: boolean;
   cb: (value: string) => void;
+  onBlur?: () => void;
 };
 
-const TextInput = (props: props) => {
+const TextInput = (props: propsTextInput) => {
+  const [hide, setHide] = useState<boolean>(true);
+
   return (
     <PaperTextInput
+      style={{
+        backgroundColor: "white",
+      }}
+      onBlur={props.onBlur}
       mode={props.mode ?? "outlined"}
       label={props.label}
       placeholder={props.placeholder}
       value={props.value}
-      secureTextEntry={props.secureTextEntry}
+      secureTextEntry={props.isPassword && hide}
       onChangeText={(value) => props.cb(value)}
-      right={props.right}
+      right={
+        props.right ??
+        (props.isPassword ? (
+          <PaperTextInput.Icon
+            onPress={() => setHide((prev) => !prev)}
+            icon={hide ? "eye-off" : "eye"}
+          />
+        ) : (
+          <></>
+        ))
+      }
     />
   );
 };

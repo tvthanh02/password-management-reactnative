@@ -8,6 +8,7 @@ const Searchbar = () => {
     <PaperSearchbar
       style={{
         borderRadius: 10,
+        backgroundColor: "white",
       }}
       mode="bar"
       placeholder="Tìm kiếm"

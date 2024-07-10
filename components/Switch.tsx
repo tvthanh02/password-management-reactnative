@@ -1,12 +1,19 @@
-import { useState } from "react";
 import { Switch as PaperSwitch } from "react-native-paper";
 
-const Switch = () => {
-  const [isSwitchOn, setIsSwitchOn] = useState(false);
+type propsSwitch = {
+  status: boolean;
+  onChange: () => void;
+};
 
-  const onToggleSwitch = () => setIsSwitchOn(!isSwitchOn);
-
-  return <PaperSwitch value={isSwitchOn} onValueChange={onToggleSwitch} />;
+const Switch = (props: propsSwitch) => {
+  return (
+    <PaperSwitch
+      style={{}}
+      color="green"
+      value={props.status}
+      onValueChange={props.onChange}
+    />
+  );
 };
 
 export default Switch;
