@@ -1,19 +1,23 @@
 import CryptoES from "crypto-es";
 
-export const encodeSek = (sek: string, passPhrase: string, salt: string) => {
+export const encodeAES = (symmetrickey: string, plainText: string) => {
   try {
-    return CryptoES.AES.encrypt(sek, passPhrase + salt).toString();
+    return CryptoES.AES.encrypt(plainText, symmetrickey).toString();
   } catch (error) {
     console.log("1", error);
   }
 };
 
-export const decodeSek = (
-  encryptedSek: string,
-  passPhrase: string,
-  salt: string
-) => {
-  return CryptoES.AES.decrypt(encryptedSek, passPhrase + salt).toString(
+export const decodeAES = (symmetrickey: string, cipherText: string) => {
+  return CryptoES.AES.decrypt(cipherText, symmetrickey).toString(
     CryptoES.enc.Utf8
   );
+};
+
+export const hashSHA256 = (plainText: string) => {
+  try {
+    return CryptoES.SHA256(plainText).toString(CryptoES.enc.Hex);
+  } catch (error) {
+    console.log("1", error);
+  }
 };

@@ -1,27 +1,31 @@
+import { SessionProvider } from "@/context/SessionContext";
 import { Stack } from "expo-router";
 import React from "react";
 
 export default function TabLayout() {
   return (
-    <Stack
-      screenOptions={{
-        headerShown: false,
-      }}
-    >
-      <Stack.Screen
-        name="index"
-        options={{
-          title: "Home",
+    <SessionProvider>
+      <Stack
+        screenOptions={{
+          headerShown: false,
         }}
-      />
-      <Stack.Screen
-        name="add-new"
-        options={{
-          headerShown: true,
-          title: "Thêm Mật Khẩu",
-        }}
-      />
-      <Stack.Screen name="add-new-detail" />
-    </Stack>
+      >
+        <Stack.Screen
+          name="index"
+          options={{
+            title: "Home",
+          }}
+        />
+        <Stack.Screen
+          name="add-new"
+          options={{
+            headerShown: true,
+            title: "Thêm Mật Khẩu",
+          }}
+        />
+        <Stack.Screen name="add-new-detail" />
+        <Stack.Screen name="input-passphrase" />
+      </Stack>
+    </SessionProvider>
   );
 }

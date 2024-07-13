@@ -2,18 +2,26 @@ import { StyleSheet, Text, View } from "react-native";
 import { useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { router } from "expo-router";
-import { TextInput, Button, Switch, TextLink } from "@/components/";
+import { TextInput, Button, Switch, TextLink, Dialog } from "@/components/";
 import { FIREBASE_APP } from "@/config/firebase.config";
-import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
+import {
+  getAuth,
+  signInWithEmailAndPassword,
+  sendPasswordResetEmail,
+} from "firebase/auth";
 import { doc, getDoc, getFirestore } from "firebase/firestore";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { PaperProvider, DefaultTheme } from "react-native-paper";
 
 const Index = () => {
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [error, setError] = useState<any>(null);
   const [theme, setTheme] = useState<boolean>(false);
+  const [openDialog, setOpenDialog] = useState(false);
+  const [contentDialog, setContentDialog] = useState<string>("");
 
+  // handle signin
   const handleSignIn = async () => {
     try {
       const userCredential = await signInWithEmailAndPassword(
@@ -29,9 +37,12 @@ const Index = () => {
       const docSnap = await getDoc(docRef);
 
       if (docSnap.exists()) {
-        const { salt, sek } = docSnap.data();
+        const { sa, se } = docSnap.data();
         try {
-          await AsyncStorage.setItem("userinfo", JSON.stringify({ salt, sek }));
+          await AsyncStorage.setItem(
+            "userinfo",
+            JSON.stringify({ salt: sa, sek: se })
+          );
           router.replace("(tabs)");
         } catch (e: any) {
           console.log(e.message);
@@ -44,103 +55,132 @@ const Index = () => {
     }
   };
 
+  // handle forget password
+  const handleForgetPassword = async () => {
+    try {
+      await sendPasswordResetEmail(getAuth(FIREBASE_APP), email);
+      setOpenDialog(true);
+      setContentDialog(
+        "Reset Password Link đã được gửi. Hãy kiểm tra email của bạn!"
+      );
+    } catch (e: any) {
+      setError(e.message);
+    }
+  };
+
+  const childTheme = {
+    ...DefaultTheme,
+    colors: {
+      ...DefaultTheme.colors,
+      primary: "gray",
+      //accent: "green",
+    },
+  };
+
   return (
-    <SafeAreaView style={{ flex: 1 }}>
-      <View style={styles.container}>
-        <View style={styles.switch}>
-          <Text>Chế độ Sáng / Tối</Text>
-          <Switch status={theme} onChange={() => setTheme((prev) => !prev)} />
-        </View>
-        <View
-          style={{
-            flex: 1,
-            width: "100%",
-            display: "flex",
-            justifyContent: "center",
-            gap: 30,
-          }}
-        >
-          <View style={styles.appName}>
-            <Text style={styles.title}>App Name</Text>
+    <PaperProvider theme={childTheme}>
+      <SafeAreaView style={{ flex: 1 }}>
+        <View style={styles.container}>
+          <View style={styles.switch}>
+            <Text>Chế độ Sáng / Tối</Text>
+            <Switch status={theme} onChange={() => setTheme((prev) => !prev)} />
           </View>
-          <View style={styles.form}>
-            <TextInput
-              label="Email"
-              placeholder="Nhập email"
-              value={email}
-              cb={setEmail}
-            ></TextInput>
-            <TextInput
-              label="Mật khẩu"
-              placeholder="Nhập mật khẩu"
-              value={password}
-              cb={setPassword}
-              isPassword={true}
-            />
-          </View>
-          {error && (
-            <Text
-              style={{
-                color: "red",
-              }}
-            >
-              Email hoặc mật khẩu không đúng!
-            </Text>
-          )}
-          <View style={{ width: "100%", alignItems: "flex-end" }}>
-            <TextLink
-              title="Quên mật khẩu?"
-              style={{ color: "blue" }}
-              navigate={() => router.push("/forgot-password")}
-            />
-          </View>
-        </View>
-        <View
-          style={{
-            // flex: 1,
-            width: "100%",
-            display: "flex",
-            justifyContent: "flex-end",
-            paddingVertical: 20,
-            gap: 20,
-          }}
-        >
-          <Button
-            disabled={!email || !password ? true : false}
-            style={{
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-              borderRadius: 10,
-              height: 50,
-            }}
-            buttonColor="red"
-            mode="text"
-            cb={handleSignIn}
-          >
-            <Text style={{ color: "white" }}>Đăng nhập</Text>
-          </Button>
           <View
             style={{
+              flex: 1,
               width: "100%",
               display: "flex",
-              flexDirection: "row",
               justifyContent: "center",
-              gap: 10,
+              gap: 30,
             }}
           >
-            <Text>Bạn chưa có tài khoản?</Text>
-            <TextLink
-              title="Tạo tài khoản"
+            <View style={styles.appName}>
+              <Text style={styles.title}>App Name</Text>
+            </View>
+            <View style={styles.form}>
+              <TextInput
+                label="Email"
+                placeholder="Nhập email"
+                value={email}
+                cb={setEmail}
+              ></TextInput>
+              <TextInput
+                label="Mật khẩu"
+                placeholder="Nhập mật khẩu"
+                value={password}
+                cb={setPassword}
+                isPassword={true}
+              />
+            </View>
+            {error && (
+              <Text
+                style={{
+                  color: "red",
+                }}
+              >
+                Email hoặc mật khẩu không đúng!
+              </Text>
+            )}
+            <View style={{ width: "100%", alignItems: "flex-end" }}>
+              <TextLink
+                title="Quên mật khẩu?"
+                style={{ color: "blue" }}
+                navigate={() => handleForgetPassword()}
+              />
+            </View>
+          </View>
+          <View
+            style={{
+              // flex: 1,
+              width: "100%",
+              display: "flex",
+              justifyContent: "flex-end",
+              paddingVertical: 20,
+              gap: 20,
+            }}
+          >
+            <Button
+              disabled={!email || !password ? true : false}
               style={{
-                color: "blue",
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                borderRadius: 10,
+                height: 50,
               }}
-              navigate={() => router.push("/register")}
-            />
+              buttonColor="red"
+              mode="text"
+              cb={handleSignIn}
+            >
+              <Text style={{ color: "white" }}>Đăng nhập</Text>
+            </Button>
+            <View
+              style={{
+                width: "100%",
+                display: "flex",
+                flexDirection: "row",
+                justifyContent: "center",
+                gap: 10,
+              }}
+            >
+              <Text>Bạn chưa có tài khoản?</Text>
+              <TextLink
+                title="Tạo tài khoản"
+                style={{
+                  color: "blue",
+                }}
+                navigate={() => router.push("/register")}
+              />
+            </View>
           </View>
         </View>
-      </View>
-    </SafeAreaView>
+      </SafeAreaView>
+      <Dialog
+        show={openDialog}
+        content={contentDialog}
+        cb={() => setContentDialog}
+      />
+    </PaperProvider>
   );
 };
 

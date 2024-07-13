@@ -6,41 +6,68 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { TextInput, Button } from "@/components";
 import generateSalt from "@/utils/generateSalt";
 import generateSek from "@/utils/generateSek";
-import { encodeSek } from "@/utils/encryption";
+import { encodeAES, hashSHA256 } from "@/utils/encryption";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { getAuth } from "firebase/auth";
 import { FIREBASE_APP } from "@/config/firebase.config";
 import { doc, getFirestore, setDoc } from "firebase/firestore";
+import { sendEmail } from "@/utils/mail";
+import { generateBaseTemp } from "@/utils/generateHtml";
 
 const Passphrase = () => {
   const [passPhrase, setPassPhrase] = useState("");
 
+  const auth = getAuth(FIREBASE_APP);
+
   const handleOk = async () => {
-    const salt = generateSalt(10);
-    const sek = await generateSek(10);
-    const encryptedSek = passPhrase
-      ? encodeSek(sek, passPhrase, salt)
-      : undefined;
-    if (encryptedSek) {
-      try {
-        await saveUserToFirestore(salt, encryptedSek);
-        await AsyncStorage.setItem(
-          "userinfo",
-          JSON.stringify({ salt, sek: encryptedSek })
-        );
-        router.replace("(tabs)");
-      } catch (error: any) {
-        console.log(error.message);
+    if (passPhrase.length > 0) {
+      // create cipher passphrase for feat forget passphrase
+      // generate symmetrickey
+      const symmetrickeyPassPhrase = await generateSek(20);
+      const passphraseEncrypted = encodeAES(symmetrickeyPassPhrase, passPhrase);
+      const formatCipherTextEmail = passphraseEncrypted
+        ? `${passphraseEncrypted}.${symmetrickeyPassPhrase}`
+        : "";
+
+      //generate salt
+      const salt = generateSalt(20);
+
+      //generate sek
+      const sek = await generateSek(20);
+
+      // step: hash passphrase with salt
+      const hashedPassPhrase = hashSHA256(passPhrase + salt);
+
+      // encode sek with alg AES (key: hash passphrase)
+      const sekEncrypted = hashedPassPhrase
+        ? encodeAES(hashedPassPhrase, sek)
+        : undefined;
+
+      // save to db
+      if (sekEncrypted) {
+        try {
+          await saveUserToFirestore(salt, sekEncrypted);
+          sendEmail(
+            auth.currentUser?.email,
+            "Thư Chào Mừng",
+            "",
+            generateBaseTemp(formatCipherTextEmail, auth.currentUser?.email)
+          ).then(() => {});
+
+          router.replace("/");
+        } catch (error: any) {
+          console.log(error.message);
+        }
       }
     }
   };
 
-  const saveUserToFirestore = async (salt: string, encryptedSek: string) => {
+  const saveUserToFirestore = async (salt: string, sek: string) => {
     const user = getAuth(FIREBASE_APP).currentUser;
     try {
       await setDoc(doc(getFirestore(FIREBASE_APP), "users", user?.uid), {
-        salt: salt,
-        sek: encryptedSek,
+        sa: salt,
+        se: sek,
       });
       console.log("Thành công", "Tài khoản của bạn đã được lưu vào Firestore.");
     } catch (error: any) {
