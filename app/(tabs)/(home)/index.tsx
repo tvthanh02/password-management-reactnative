@@ -9,7 +9,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Entypo } from "@expo/vector-icons";
 import { Feather } from "@expo/vector-icons";
-import { router } from "expo-router";
+import { router, useNavigation, useFocusEffect } from "expo-router";
 import {
   collection,
   query,
@@ -19,13 +19,16 @@ import {
   DocumentData,
   doc,
   deleteDoc,
+  orderBy,
+  startAt,
+  endAt,
 } from "firebase/firestore";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { FIREBASE_APP } from "@/config/firebase.config";
 import { getAuth } from "firebase/auth";
 import { SvgXml } from "react-native-svg";
 import { useSession } from "@/context/SessionContext";
-import { Dialog, Searchbar, Menu } from "@/components";
+import { Alert, Searchbar, Menu, ConfirmDialog } from "@/components";
 import { PaperProvider, DefaultTheme } from "react-native-paper";
 import { decodeAES } from "@/utils/encryption";
 import * as Clipboard from "expo-clipboard";
@@ -33,16 +36,23 @@ import * as Clipboard from "expo-clipboard";
 export default function HomeScreen() {
   const [showOption, setShowOption] = useState(false);
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
-  const [contentDialog, setContentDialog] = useState<string>("");
+  const [contentAlert, setContentAlert] = useState<string>("");
+  const [deleteVaultId, setDeleteVaultId] = useState<string>("");
+
+  // confirm dialog
+
+  const [isShowConfirm, setShowConfirm] = useState(false);
+  const navigation = useNavigation();
 
   const {
-    showDialog,
-    setShowDialog,
+    showAlert,
+    setShowAlert,
     isSessionActive,
     timeRemaining,
     startSession,
     stopSession,
     sekDecode,
+    setStartTimer,
   } = useSession();
 
   const [vaults, setVaults] = useState<
@@ -54,8 +64,8 @@ export default function HomeScreen() {
   >([]);
 
   const handleViewVault = (item: { id: string; data: DocumentData }) => {
-    setContentDialog(decodeAES(sekDecode, item.data.pass));
-    setShowDialog && setShowDialog(true);
+    setContentAlert(decodeAES(sekDecode, item.data.pass));
+    setShowAlert && setShowAlert(true);
   };
 
   const handleEditVault = (id: string) => {
@@ -74,14 +84,13 @@ export default function HomeScreen() {
     // get id vault
     // comfirm
     // => delete/cancel
-    const docRef = doc(getFirestore(FIREBASE_APP), "vaults", id);
+    setDeleteVaultId(id);
+    setShowConfirm(true);
+
     try {
-      await deleteDoc(docRef);
-      setContentDialog("Xóa thành công!");
-      setShowDialog && setShowDialog(true);
     } catch (error) {
-      setContentDialog("Đã có lỗi xảy ra! Xóa thất bại.");
-      setShowDialog && setShowDialog(true);
+      setContentAlert("Đã có lỗi xảy ra! Xóa thất bại.");
+      setShowAlert && setShowAlert(true);
     }
   };
 
@@ -94,27 +103,72 @@ export default function HomeScreen() {
     }
   };
 
+  const loadDataWithSearchKey = async (searchKey?: string) => {
+    if (searchKey && searchKey.length > 0) {
+      const q = query(
+        collection(getFirestore(FIREBASE_APP), "vaults"),
+        where("userId", "==", getAuth(FIREBASE_APP).currentUser?.uid),
+        orderBy("title"),
+        startAt(searchKey),
+        endAt(searchKey + "\uf8ff")
+      );
+
+      try {
+        const querySnapshot = await getDocs(q);
+        setVaults(
+          querySnapshot.docs.map((doc) => ({
+            id: doc.id,
+            data: doc.data(),
+          }))
+        );
+      } catch (error) {
+        console.log(error);
+      }
+      return;
+    }
+    await loadData();
+  };
+
+  const loadData = async () => {
+    const q = query(
+      collection(getFirestore(FIREBASE_APP), "vaults"),
+      where("userId", "==", getAuth(FIREBASE_APP).currentUser?.uid)
+    );
+
+    const querySnapshot = await getDocs(q);
+    setVaults(
+      querySnapshot.docs.map((doc) => ({
+        id: doc.id,
+        data: doc.data(),
+      }))
+    );
+  };
+
+  const removeVault = async (id: string) => {
+    const docRef = doc(getFirestore(FIREBASE_APP), "vaults", id);
+    await deleteDoc(docRef);
+  };
+
   // handle session
+  useFocusEffect(
+    useCallback(() => {
+      setStartTimer && setStartTimer(true);
+
+      return () => {
+        setStartTimer && setStartTimer(false);
+      };
+    }, [navigation])
+  );
+
   useEffect(() => {
     if (!isSessionActive) {
       router.replace("/input-passphrase");
     }
-  }, [isSessionActive, router]);
+  }, [isSessionActive]);
 
   useEffect(() => {
     (async () => {
-      const q = query(
-        collection(getFirestore(FIREBASE_APP), "vaults"),
-        where("userId", "==", getAuth(FIREBASE_APP).currentUser?.uid)
-      );
-
-      const querySnapshot = await getDocs(q);
-      setVaults(
-        querySnapshot.docs.map((doc) => ({
-          id: doc.id,
-          data: doc.data(),
-        }))
-      );
+      await loadData();
     })();
   }, []);
 
@@ -186,11 +240,8 @@ export default function HomeScreen() {
               width: "100%",
             }}
           >
-            <Searchbar></Searchbar>
+            <Searchbar fnSearch={loadDataWithSearchKey} />
           </View>
-          {/* <View>
-          <SegmentedButtons />
-        </View> */}
         </View>
         <View
           style={{
@@ -229,15 +280,15 @@ export default function HomeScreen() {
                       //       stopSession && stopSession();
                       //       //return;
                       //     }
-                      //     //setShowDialog && setShowDialog(true);
+                      //     //setShowAlert && setShowAlert(true);
                       //     // alert("123");
-                      //     //<Dialog show={true} />;
+                      //     //<Alert show={true} />;
                       //     setSelectedOption(null);
                       //     setShowOption(false);
                       //   }
                       // }}
                       onPress={() => {
-                        setContentDialog(decodeAES(sekDecode, item.data.pass));
+                        setContentAlert(decodeAES(sekDecode, item.data.pass));
                         setSelectedOption(item.id);
                         setShowOption((prev) => !prev);
                       }}
@@ -289,10 +340,26 @@ export default function HomeScreen() {
             <Text>Chưa có vault nào.</Text>
           )}
         </View>
-        <Dialog
-          show={showDialog}
-          content={contentDialog}
-          cb={() => setShowDialog && setShowDialog(false)}
+        <Alert
+          show={showAlert}
+          content={contentAlert}
+          cb={() => setShowAlert && setShowAlert((prev) => !prev)}
+        />
+        <ConfirmDialog
+          isShow={isShowConfirm}
+          cbShow={() => setShowConfirm((prev) => !prev)}
+          title="Xác nhận!"
+          content="Chắc chắn xóa?"
+          cbCancel={() => setShowConfirm(false)}
+          cbOk={() => {
+            (async () => {
+              await removeVault(deleteVaultId);
+              await loadData();
+              setContentAlert("Xóa thành công!");
+              setShowAlert && setShowAlert(true);
+              setShowConfirm(false);
+            })();
+          }}
         />
       </SafeAreaView>
     </PaperProvider>

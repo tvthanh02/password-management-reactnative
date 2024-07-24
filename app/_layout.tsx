@@ -55,6 +55,8 @@ export default function RootLayout() {
       <Stack.Screen name="register" options={{ headerShown: false }} />
       <Stack.Screen name="verify-email" options={{ headerShown: false }} />
       <Stack.Screen name="passphrase" options={{ headerShown: false }} />
+      <Stack.Screen name="forget-passphrase" options={{ headerShown: false }} />
+      <Stack.Screen name="new-passphrase" options={{ headerShown: false }} />
       <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
       <Stack.Screen name="+not-found" />
     </Stack>

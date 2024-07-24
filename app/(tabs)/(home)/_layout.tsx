@@ -2,7 +2,7 @@ import { SessionProvider } from "@/context/SessionContext";
 import { Stack } from "expo-router";
 import React from "react";
 
-export default function TabLayout() {
+export default function HomeLayout() {
   return (
     <SessionProvider>
       <Stack

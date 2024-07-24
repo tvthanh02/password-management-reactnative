@@ -7,7 +7,7 @@ type props = {
   cb: () => void;
 };
 
-const Dialog = ({ show, cb, content }: props) => {
+const Alert = ({ show, cb, content }: props) => {
   return (
     <PaperDialog
       style={{
@@ -26,4 +26,4 @@ const Dialog = ({ show, cb, content }: props) => {
   );
 };
 
-export default Dialog;
+export default Alert;

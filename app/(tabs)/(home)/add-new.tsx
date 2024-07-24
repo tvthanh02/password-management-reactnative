@@ -57,7 +57,7 @@ const AddNew = () => {
             width: "100%",
           }}
         >
-          <Searchbar />
+          {/* <Searchbar /> */}
         </View>
         <View
           style={{

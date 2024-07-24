@@ -8,6 +8,7 @@ import { router } from "expo-router";
 
 const EnterCodeScreen = () => {
   const [passphrase, setPassphrase] = useState("");
+  const [error, setError] = useState("");
 
   const { startSession, setSekDecode } = useSession();
 
@@ -28,6 +29,7 @@ const EnterCodeScreen = () => {
             startSession();
             router.replace("(home)");
           } else {
+            setError("invalid value");
             console.log("passphrase sai!");
           }
         } catch (error) {
@@ -68,7 +70,15 @@ const EnterCodeScreen = () => {
             placeholder="PassPhrase"
           ></TextInput>
         </View>
-        <View></View>
+        {error && (
+          <Text
+            style={{
+              color: "red",
+            }}
+          >
+            {error}
+          </Text>
+        )}
         <View
           style={{
             width: "100%",

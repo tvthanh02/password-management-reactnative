@@ -2,19 +2,22 @@ import { createContext, useState, useEffect, useContext } from "react";
 import { router } from "expo-router";
 
 type sessionProps = {
-  showDialog: boolean;
+  isStartTimer: boolean;
+  setStartTimer?: React.Dispatch<React.SetStateAction<boolean>>;
+  showAlert: boolean;
   isSessionActive: boolean;
   startSession: () => void;
   stopSession?: () => void;
   timeRemaining: number;
   sekDecode: string;
   setSekDecode?: React.Dispatch<React.SetStateAction<string>>;
-  setShowDialog?: React.Dispatch<React.SetStateAction<boolean>>;
+  setShowAlert?: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
 // initial context
 const SessionContext = createContext<sessionProps>({
-  showDialog: false,
+  isStartTimer: false,
+  showAlert: false,
   isSessionActive: false,
   timeRemaining: 180,
   sekDecode: "",
@@ -27,6 +30,7 @@ type props = {
 
 export const SessionProvider = ({ children }: props) => {
   const startSession = () => {
+    setStartTimer(true);
     setIsSessionActive(true);
     setTimeRemaining(180);
   };
@@ -39,17 +43,18 @@ export const SessionProvider = ({ children }: props) => {
   const [isSessionActive, setIsSessionActive] = useState(false);
   const [timeRemaining, setTimeRemaining] = useState(180); // 3 minutes in seconds
   const [sekDecode, setSekDecode] = useState("");
-  const [showDialog, setShowDialog] = useState(false);
+  const [showAlert, setShowAlert] = useState(false);
+  const [isStartTimer, setStartTimer] = useState(false);
 
   useEffect(() => {
     let timer: NodeJS.Timeout;
-    if (isSessionActive) {
+    if (isSessionActive && isStartTimer) {
       timer = setInterval(() => {
         setTimeRemaining((prevTime) => {
           if (prevTime <= 1) {
             clearInterval(timer);
             setIsSessionActive(false);
-            router.replace("/input-passphrase");
+            //router.replace("/input-passphrase");
             return 180;
           }
           return prevTime - 1;
@@ -57,7 +62,7 @@ export const SessionProvider = ({ children }: props) => {
       }, 1000);
     }
     return () => clearInterval(timer);
-  }, [isSessionActive, router]);
+  }, [isSessionActive, isStartTimer]);
 
   return (
     <SessionContext.Provider
@@ -68,8 +73,10 @@ export const SessionProvider = ({ children }: props) => {
         timeRemaining,
         sekDecode,
         setSekDecode,
-        showDialog,
-        setShowDialog,
+        showAlert,
+        setShowAlert,
+        isStartTimer,
+        setStartTimer,
       }}
     >
       {children}

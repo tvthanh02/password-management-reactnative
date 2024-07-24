@@ -7,5 +7,6 @@ export { default as TextInput } from "./TextInput";
 export { default as ThemedText } from "./ThemedText";
 export { default as ThemedView } from "./ThemedView";
 export { default as TextLink } from "./TextLink";
-export { default as Dialog } from "./Dialog";
+export { default as Alert } from "./Alert";
 export { default as Menu } from "./Menu";
+export { default as ConfirmDialog } from "./ConfirmDialog";

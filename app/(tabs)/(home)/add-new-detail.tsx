@@ -1,7 +1,7 @@
 import { FlatList, StyleSheet, Text, View } from "react-native";
 import { useEffect, useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Switch, TextInput, TextLink, Dialog } from "@/components";
+import { Switch, TextInput, TextLink, Alert } from "@/components";
 import { router, useGlobalSearchParams } from "expo-router";
 import {
   getDoc,
@@ -19,18 +19,6 @@ import { useSession } from "@/context/SessionContext";
 import { decodeAES, encodeAES } from "@/utils/encryption";
 import { PaperProvider, DefaultTheme } from "react-native-paper";
 
-// type vaultProps = {
-//   account: string
-//   icon: string
-//   autoFill: boolean
-//   note: string
-//   pass: string
-//   repromptPassphrase: boolean
-//   title: string
-//   url: string
-//   userId: string
-// };
-
 const AddNew = () => {
   const { itemId, vaultId } = useGlobalSearchParams();
   const { sekDecode } = useSession();
@@ -44,8 +32,8 @@ const AddNew = () => {
   1.172-6.828C4.343 4 6.229 4 10 4h4c3.771 0 5.657 0 6.828 1.172c.654.653.943
   1.528 1.07 2.828"/></svg>`;
 
-  const [openDialog, setOpenDialog] = useState(false);
-  const [contentDialog, setContentDialog] = useState("");
+  const [openAlert, setOpenAlert] = useState(false);
+  const [contentAlert, setContentAlert] = useState("");
   const [title, setTitle] = useState<string>("");
   const [thumb, setThumb] = useState<string>("");
   const [url, setUrl] = useState<string>("");
@@ -84,11 +72,11 @@ const AddNew = () => {
             icon: icon || lockSvg,
             userId: getAuth(FIREBASE_APP).currentUser?.uid,
           });
-          setContentDialog("Thêm thành công!");
-          setOpenDialog(true);
+          setContentAlert("Thêm thành công!");
+          setOpenAlert(true);
         } catch (error) {
-          setContentDialog("Đã có lỗi xảy ra. Thêm không thành công!");
-          setOpenDialog(true);
+          setContentAlert("Đã có lỗi xảy ra. Thêm không thành công!");
+          setOpenAlert(true);
         }
       } else {
         console.log("lỗi khi mã hóa mật khẩu");
@@ -121,11 +109,11 @@ const AddNew = () => {
         repromptPassphrase,
         icon: icon || lockSvg,
       });
-      setContentDialog("Sửa thành công!");
-      setOpenDialog(true);
+      setContentAlert("Sửa thành công!");
+      setOpenAlert(true);
     } catch (error) {
-      setContentDialog("Đã có lỗi xảy ra. Sửa không thành công!");
-      setOpenDialog(true);
+      setContentAlert("Đã có lỗi xảy ra. Sửa không thành công!");
+      setOpenAlert(true);
     }
   };
 
@@ -390,11 +378,7 @@ const AddNew = () => {
           </View>
         </View>
       </SafeAreaView>
-      <Dialog
-        show={openDialog}
-        cb={() => setOpenDialog}
-        content={contentDialog}
-      />
+      <Alert show={openAlert} cb={() => setOpenAlert} content={contentAlert} />
     </PaperProvider>
   );
 };

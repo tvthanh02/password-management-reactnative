@@ -29,7 +29,7 @@ export const checkConfirmEmail = async (code: string) => {
     const response = await fetch(
       `https://mail-server-lzj6.onrender.com/api/v1/check-status-confirm?code=${code}`
     );
-    const data = response.json();
+    const data = await response.json();
 
     const { confirm }: any = data;
 

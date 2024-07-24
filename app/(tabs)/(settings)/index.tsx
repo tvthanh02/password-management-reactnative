@@ -22,6 +22,9 @@ const Index = () => {
   return (
     <View style={styles.container}>
       <Text>Setting Screen</Text>
+      <TouchableOpacity onPress={() => router.push("/forget-passphrase")}>
+        <Text>Quên cụm mật khẩu</Text>
+      </TouchableOpacity>
       <TouchableOpacity onPress={handleLogout}>
         <Text>Logout</Text>
       </TouchableOpacity>

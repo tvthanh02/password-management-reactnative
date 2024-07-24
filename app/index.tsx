@@ -2,7 +2,7 @@ import { StyleSheet, Text, View } from "react-native";
 import { useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { router } from "expo-router";
-import { TextInput, Button, Switch, TextLink, Dialog } from "@/components/";
+import { TextInput, Button, Switch, TextLink, Alert } from "@/components/";
 import { FIREBASE_APP } from "@/config/firebase.config";
 import {
   getAuth,
@@ -18,8 +18,8 @@ const Index = () => {
   const [password, setPassword] = useState<string>("");
   const [error, setError] = useState<any>(null);
   const [theme, setTheme] = useState<boolean>(false);
-  const [openDialog, setOpenDialog] = useState(false);
-  const [contentDialog, setContentDialog] = useState<string>("");
+  const [openAlert, setOpenAlert] = useState(false);
+  const [contentAlert, setContentAlert] = useState<string>("");
 
   // handle signin
   const handleSignIn = async () => {
@@ -59,8 +59,8 @@ const Index = () => {
   const handleForgetPassword = async () => {
     try {
       await sendPasswordResetEmail(getAuth(FIREBASE_APP), email);
-      setOpenDialog(true);
-      setContentDialog(
+      setOpenAlert(true);
+      setContentAlert(
         "Reset Password Link đã được gửi. Hãy kiểm tra email của bạn!"
       );
     } catch (e: any) {
@@ -118,7 +118,7 @@ const Index = () => {
                   color: "red",
                 }}
               >
-                Email hoặc mật khẩu không đúng!
+                {error}
               </Text>
             )}
             <View style={{ width: "100%", alignItems: "flex-end" }}>
@@ -175,10 +175,10 @@ const Index = () => {
           </View>
         </View>
       </SafeAreaView>
-      <Dialog
-        show={openDialog}
-        content={contentDialog}
-        cb={() => setContentDialog}
+      <Alert
+        show={openAlert}
+        content={contentAlert}
+        cb={() => setOpenAlert((prev) => !prev)}
       />
     </PaperProvider>
   );
