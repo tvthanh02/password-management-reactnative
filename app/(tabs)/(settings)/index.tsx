@@ -25,6 +25,9 @@ const Index = () => {
       <TouchableOpacity onPress={() => router.push("/forget-passphrase")}>
         <Text>Quên cụm mật khẩu</Text>
       </TouchableOpacity>
+      <TouchableOpacity onPress={() => router.push("/add-product")}>
+        <Text>Thêm Sản Phẩm</Text>
+      </TouchableOpacity>
       <TouchableOpacity onPress={handleLogout}>
         <Text>Logout</Text>
       </TouchableOpacity>

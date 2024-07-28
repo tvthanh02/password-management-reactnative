@@ -4,10 +4,11 @@ import { Button, Dialog as PaperDialog, Text } from "react-native-paper";
 type props = {
   show: boolean;
   content: string;
-  cb: () => void;
+  cbOk: () => void;
+  cbCancle: () => void;
 };
 
-const Alert = ({ show, cb, content }: props) => {
+const Alert = ({ show, cbCancle, cbOk, content }: props) => {
   return (
     <PaperDialog
       style={{
@@ -19,8 +20,17 @@ const Alert = ({ show, cb, content }: props) => {
       <PaperDialog.Content>
         <Text variant="bodyMedium">{content}</Text>
       </PaperDialog.Content>
-      <PaperDialog.Actions>
-        <Button onPress={cb}>OK</Button>
+      <PaperDialog.Actions
+        style={{
+          display: "flex",
+          flexDirection: "row",
+          alignItems: "center",
+          gap: 20,
+        }}
+      >
+        <Button onPress={cbCancle}>Hủy</Button>
+
+        <Button onPress={cbOk}>OK</Button>
       </PaperDialog.Actions>
     </PaperDialog>
   );
